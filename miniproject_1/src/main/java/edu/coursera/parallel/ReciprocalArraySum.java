@@ -87,7 +87,7 @@ public final class ReciprocalArraySum {
      * created to perform reciprocal array sum in parallel.
      */
     private static class ReciprocalArraySumTask extends RecursiveAction {
-        static int SEQUENTIAL_THRESHOLD = 2000;
+//        static int SEQUENTIAL_THRESHOLD = 2000;
         /**
          * Starting index for traversal done by this task.
          */
@@ -129,18 +129,8 @@ public final class ReciprocalArraySum {
 
         @Override
         protected void compute() {
-            if (endIndexExclusive - startIndexInclusive <= SEQUENTIAL_THRESHOLD) {
-                for (int i = startIndexInclusive; i < endIndexExclusive; i++) {
-                    value += 1 / input[i];
-                }
-            } else {
-                int midIndex = (startIndexInclusive + endIndexExclusive) / 2;
-                ReciprocalArraySumTask left = new ReciprocalArraySumTask(startIndexInclusive, midIndex, input);
-                ReciprocalArraySumTask right = new ReciprocalArraySumTask(midIndex, endIndexExclusive, input);
-                left.fork();  // async
-                right.compute();
-                left.join();
-                value = left.value + right.value;
+            for (int i = startIndexInclusive; i < endIndexExclusive; i++) {
+                value += 1 / input[i];
             }
         }
     }
@@ -173,8 +163,6 @@ public final class ReciprocalArraySum {
      */
     protected static double parManyTaskArraySum(final double[] input,
             final int numTasks) {
-        double sum = 0;
-
         List<ReciprocalArraySumTask> taskList = new ArrayList<>();
 
         for (int i = 0; i < numTasks; i++) {
@@ -183,7 +171,6 @@ public final class ReciprocalArraySum {
             taskList.add(new ReciprocalArraySumTask(start, end, input));
         }
         ForkJoinTask.invokeAll(taskList);
-        sum = taskList.parallelStream().map(ReciprocalArraySumTask::getValue).mapToDouble(Double::doubleValue).sum();
-        return sum;
+        return taskList.parallelStream().map(ReciprocalArraySumTask::getValue).mapToDouble(Double::doubleValue).sum();
     }
 }
