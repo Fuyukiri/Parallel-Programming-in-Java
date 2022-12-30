@@ -1,2 +1,5 @@
-package PACKAGE_NAME;public class PlayGround {
+public class PlayGround {
+    public static void main(String[] args) {
+
+    }
 }

@@ -2,6 +2,7 @@ package edu.coursera.parallel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 
@@ -147,7 +148,15 @@ public final class ReciprocalArraySum {
     protected static double parArraySum(final double[] input) {
         assert input.length % 2 == 0;
 
-        return parManyTaskArraySum(input, 2);
+        ReciprocalArraySumTask task1 = new ReciprocalArraySumTask(0, input.length / 2, input);
+        ReciprocalArraySumTask task2 = new ReciprocalArraySumTask(input.length / 2, input.length, input);
+
+        ForkJoinPool forkJoinPool = new ForkJoinPool(2);
+        forkJoinPool.execute(task1);
+        forkJoinPool.invoke(task2);
+        task1.join();
+
+        return task1.getValue() + task2.getValue();
     }
 
 
